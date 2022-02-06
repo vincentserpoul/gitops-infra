@@ -1,0 +1,31 @@
+apiVersion: kubegres.reactive-tech.io/v1
+kind: Kubegres
+metadata:
+  name: mypostgres
+  namespace: postgres
+  annotations:
+    linkerd.io/inject: enabled
+spec:
+  replicas: 3
+  image: postgres:14.1
+
+  database:
+    size: 200Mi
+
+  backup:
+    schedule: "0 */1 * * *"
+    pvcName: my-backup-pvc
+    volumeMount: /var/lib/backup
+
+  env:
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: local-postgres-secret
+          key: superUserPassword
+
+    - name: POSTGRES_REPLICATION_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: local-postgres-secret
+          key: replicationUserPassword

@@ -1,0 +1,141 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cert-manager
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: postgres
+---
+apiVersion: v1
+data:
+  values.yaml: |
+    # thank you https://github.com/mailazy/blog/blob/28258657fc9d636eed08b6ff65f953bf450a57e5/content/exposing-tcp-udp-services-ingress/index.md
+    tcp:
+      26257: "cockroachdb/cockroachdb-service:26257"
+      6379: "redis/redis-service:6379"
+      5432: "postgres/mypostgres:5432"
+      5433: "postgres/mypostgres-replica:5432"
+      9411: "linkerd-jaeger/collector:9411"
+    controller:
+      config:
+        enable-opentracing: "true"
+        zipkin-collector-host: collector.linkerd-jaeger
+        enable-brotli: "true"
+        brotli-level: 8
+kind: ConfigMap
+metadata:
+  name: configmap-nginx
+  namespace: ingress-nginx
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-backup-pvc
+  namespace: postgres
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: mkcert-cluster-issuer
+  namespace: cert-manager
+spec:
+  ca:
+    secretName: ca-key-pair
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  chart:
+    spec:
+      chart: cert-manager
+      interval: 120m
+      sourceRef:
+        kind: HelmRepository
+        name: cert-manager
+        namespace: flux-system
+      version: '>=1.7.0'
+  interval: 5m
+  targetNamespace: cert-manager
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+        namespace: flux-system
+      version: '>=4'
+  interval: 1m
+  targetNamespace: ingress-nginx
+  valuesFrom:
+  - kind: ConfigMap
+    name: configmap-nginx
+---
+apiVersion: kubegres.reactive-tech.io/v1
+kind: Kubegres
+metadata:
+  annotations:
+    linkerd.io/inject: enabled
+  name: mypostgres
+  namespace: postgres
+spec:
+  backup:
+    pvcName: my-backup-pvc
+    schedule: 0 */1 * * *
+    volumeMount: /var/lib/backup
+  database:
+    size: 200Mi
+  env:
+  - name: POSTGRES_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        key: superUserPassword
+        name: local-postgres-secret
+  - name: POSTGRES_REPLICATION_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        key: replicationUserPassword
+        name: local-postgres-secret
+  image: postgres:14.1
+  replicas: 3
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: cert-manager
+  namespace: flux-system
+spec:
+  interval: 120m
+  url: https://charts.jetstack.io
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: ingress-nginx
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://kubernetes.github.io/ingress-nginx

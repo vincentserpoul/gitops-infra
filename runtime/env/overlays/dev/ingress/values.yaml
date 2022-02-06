@@ -1,0 +1,13 @@
+# thank you https://github.com/mailazy/blog/blob/28258657fc9d636eed08b6ff65f953bf450a57e5/content/exposing-tcp-udp-services-ingress/index.md
+tcp:
+  26257: "cockroachdb/cockroachdb-service:26257"
+  6379: "redis/redis-service:6379"
+  5432: "postgres/mypostgres:5432"
+  5433: "postgres/mypostgres-replica:5432"
+  9411: "linkerd-jaeger/collector:9411"
+controller:
+  config:
+    enable-opentracing: "true"
+    zipkin-collector-host: collector.linkerd-jaeger
+    enable-brotli: "true"
+    brotli-level: 8

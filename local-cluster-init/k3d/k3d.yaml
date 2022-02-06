@@ -1,0 +1,42 @@
+apiVersion: k3d.io/v1alpha4
+kind: Simple
+metadata:
+  name: PROJECT_NAME
+image: rancher/k3s:v1.23.3-k3s1 
+servers: 1
+agents: 2
+ports:
+  - port: 8080:80 # http
+    nodeFilters:
+      - loadbalancer
+  - port: 8443:443 # https
+    nodeFilters:
+      - loadbalancer
+  - port: 26257:26257 # cockroachdb
+    nodeFilters:
+      - loadbalancer
+  - port: 6379:6379 # redis
+    nodeFilters:
+      - loadbalancer
+  - port: 5432:5432 # pg write
+    nodeFilters:
+      - loadbalancer
+  - port: 5433:5433 # pg read
+    nodeFilters:
+      - loadbalancer
+  - port: 9411:9411 # zipkin collector
+    nodeFilters:
+      - loadbalancer
+registries: # define how registries should be created or used
+  create: # creates a default registry to be used with the cluster; same as `--registry-create registry.localhost`
+    name: registry4PROJECT_NAME.localhost
+    host: "0.0.0.0"
+    hostPort: "56789"
+options:
+  k3d: # k3d runtime settings
+    wait: true
+  k3s: # options passed on to K3s itself
+    extraArgs: # additional arguments passed to the `k3s server|agent` command; same as `--k3s-arg`
+      - arg: "--no-deploy=traefik"
+        nodeFilters:
+          - server:*

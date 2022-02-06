@@ -1,0 +1,4 @@
+nats.jetstream.enabled: true
+cluster:
+  enabled: true
+  replicas: 3
