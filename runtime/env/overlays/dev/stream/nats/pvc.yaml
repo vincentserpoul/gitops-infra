@@ -1,0 +1,14 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nats-js-disk
+  namespace: nats
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "local-path"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi

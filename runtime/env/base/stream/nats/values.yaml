@@ -1,4 +1,20 @@
-nats.jetstream.enabled: true
+nats:
+  jetstream:
+    enabled: true
+
+    fileStorage:
+      enabled: true
+      storageDirectory: /data/
+      existingClaim: nats-js-disk
+      claimStorageSize: 3Gi
+
+  # tls:
+  #   secret:
+  #     name: nats-client-tls
+  #   ca: "ca.crt"
+  #   cert: "tls.crt"
+  #   key: "tls.key"
+
 cluster:
   enabled: true
   replicas: 3

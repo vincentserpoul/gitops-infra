@@ -15,7 +15,7 @@ apply-all: context-select encrypted-manifests-apply manifest-kustomize-build man
 
 init: context-select install-crds init-db-password age-keygen
 	
-install-crds: install-crds-cert-manager install-crds-kubegres install-crds-nats install-flux
+install-crds: install-crds-cert-manager install-crds-kubegres install-flux
 	
 install-flux: 
 	flux install
@@ -91,11 +91,3 @@ age-keygen:
 	cat ./env/overlays/$(ENV)/key.age | sed -n -e 's/^.*# public key: //p' > ./env/overlays/$(ENV)/key.pub && \
 	echo "please add this key to your AGE_RECIPIENTS in ./env/overlays/$(ENV)/$(ENV).env" \
 	)
-
-
-########
-# nats #
-########
-
-install-crds-nats:
-	kubectl apply -f https://raw.githubusercontent.com/nats-io/nack/v0.6.0/deploy/crds.yml

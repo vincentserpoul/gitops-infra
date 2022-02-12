@@ -11,6 +11,11 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: nats
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: postgres
 ---
 apiVersion: v1
@@ -33,6 +38,48 @@ kind: ConfigMap
 metadata:
   name: configmap-nginx
   namespace: ingress-nginx
+---
+apiVersion: v1
+data:
+  values.yaml: |-
+    nats:
+      jetstream:
+        enabled: true
+
+        fileStorage:
+          enabled: true
+          storageDirectory: /data/
+          existingClaim: nats-js-disk
+          claimStorageSize: 3Gi
+
+      # tls:
+      #   secret:
+      #     name: nats-client-tls
+      #   ca: "ca.crt"
+      #   cert: "tls.crt"
+      #   key: "tls.key"
+
+    cluster:
+      enabled: true
+      replicas: 3
+kind: ConfigMap
+metadata:
+  name: configmap-nats
+  namespace: nats
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-class: local-path
+  name: nats-js-disk
+  namespace: nats
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -94,6 +141,27 @@ spec:
   - kind: ConfigMap
     name: configmap-nginx
 ---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nats
+  namespace: nats
+spec:
+  chart:
+    spec:
+      chart: nats
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: nats
+        namespace: flux-system
+      version: '>=0.13'
+  interval: 1m
+  targetNamespace: nats
+  valuesFrom:
+  - kind: ConfigMap
+    name: configmap-nats
+---
 apiVersion: kubegres.reactive-tech.io/v1
 kind: Kubegres
 metadata:
@@ -139,3 +207,12 @@ metadata:
 spec:
   interval: 1m
   url: https://kubernetes.github.io/ingress-nginx
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: nats
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://nats-io.github.io/k8s/helm/charts/

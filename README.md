@@ -18,3 +18,13 @@
 ## Add tracing
 
 [README](./tracing/)
+
+## TO DO
+
+- [x] nats jetstream
+- [ ] simple app example
+- [ ] run Kube-score, regula, popeye, polaris on the configs/cluster
+- [ ] realtime from supabase for pg updates
+- [ ] pgcat in front of the cluster?
+- [ ] gitcliff changelog
+- [ ] pixie?

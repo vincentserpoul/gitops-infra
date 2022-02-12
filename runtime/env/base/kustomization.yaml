@@ -3,13 +3,13 @@ kind: Kustomization
 metadata:
   name: cluster
 
-# configMapGenerator:
-#   - name: configmap-nats
-#     namespace: nats
-#     files:
-#       - ./stream/nats/values.yaml
-# generatorOptions:
-#   disableNameSuffixHash: true
+configMapGenerator:
+  - name: configmap-nats
+    namespace: nats
+    files:
+      - ./stream/nats/values.yaml
+generatorOptions:
+  disableNameSuffixHash: true
 
 resources:
   - ingress/helm-repository.yaml
@@ -21,6 +21,6 @@ resources:
   - storage/postgres/namespace.yaml
   - storage/postgres/backup.yaml
   - storage/postgres/postgres.yaml
-  # - nats/helm-repository.yaml
-  # - nats/namespace.yaml
-  # - nats/helm-release.yaml
+  - stream/nats/helm-repository.yaml
+  - stream/nats/namespace.yaml
+  - stream/nats/helm-release.yaml
