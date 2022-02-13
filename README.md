@@ -22,9 +22,10 @@
 ## TO DO
 
 - [x] nats jetstream
+- [x] run Kube-score ✅, regula ✅, popeye (bugged for latest k8s, to rerun), polaris ✅ on the configs/cluster
 - [ ] simple app example
-- [ ] run Kube-score, regula, popeye, polaris on the configs/cluster
 - [ ] realtime from supabase for pg updates
-- [ ] pgcat in front of the cluster?
+- [ ] complex app example (leveraging tracing, realtime, postgres and jetstream)
+- [ ] test pgcat in front of the cluster?
 - [ ] gitcliff changelog
-- [ ] pixie?
+- [ ] pixie
