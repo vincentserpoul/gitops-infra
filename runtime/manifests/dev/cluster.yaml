@@ -16,6 +16,11 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: observability
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: postgres
 ---
 apiVersion: v1
@@ -27,11 +32,12 @@ data:
       6379: "redis/redis-service:6379"
       5432: "postgres/mypostgres:5432"
       5433: "postgres/mypostgres-replica:5432"
-      9411: "linkerd-jaeger/collector:9411"
+      4317: "observability/observability-opentelemetry-collector:4317"
+      4318: "observability/observability-opentelemetry-collector:4318"
     controller:
       config:
         enable-opentracing: "true"
-        zipkin-collector-host: collector.linkerd-jaeger
+        jaeger-collector-host: observability-opentelemetry-collector.observability
         enable-brotli: "true"
         brotli-level: 8
 kind: ConfigMap
@@ -66,6 +72,17 @@ kind: ConfigMap
 metadata:
   name: configmap-nats
   namespace: nats
+---
+apiVersion: v1
+data:
+  values.yaml: "agentCollector:\n  enabled: false\nstandaloneCollector:\n  enabled:
+    true\nconfig:  \n  exporters:\n    jaeger:\n      endpoint: jaeger-collector.observability:14250\n
+    \     tls:\n        insecure: true\n  service:\n    pipelines:\n      metrics:
+    null\n      traces:\n        exporters:\n          - jaeger        "
+kind: ConfigMap
+metadata:
+  name: configmap-opentelemetry-collector
+  namespace: observability
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -162,6 +179,51 @@ spec:
   - kind: ConfigMap
     name: configmap-nats
 ---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jaeger-operator
+  namespace: observability
+spec:
+  chart:
+    spec:
+      chart: jaeger-operator
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: jaegertracing
+        namespace: flux-system
+      version: '>=0.5'
+  interval: 1m
+  targetNamespace: observability
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: opentelemetry-collector
+  namespace: observability
+spec:
+  chart:
+    spec:
+      chart: opentelemetry-collector
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: opentelemetry
+        namespace: flux-system
+      version: '>=0.6'
+  interval: 1m
+  targetNamespace: observability
+  valuesFrom:
+  - kind: ConfigMap
+    name: configmap-opentelemetry-collector
+---
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger
+  namespace: observability
+---
 apiVersion: kubegres.reactive-tech.io/v1
 kind: Kubegres
 metadata:
@@ -211,8 +273,26 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
+  name: jaegertracing
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://jaegertracing.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
   name: nats
   namespace: flux-system
 spec:
   interval: 1m
   url: https://nats-io.github.io/k8s/helm/charts/
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: opentelemetry
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://open-telemetry.github.io/opentelemetry-helm-charts

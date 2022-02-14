@@ -1,6 +1,6 @@
 .PHONY: init install-linkerd install-linkerd-jaeger install-linkerd-viz
 
-init: install-linkerd install-linkerd-jaeger patch-postgres-cronjob
+init: install-linkerd patch-postgres-cronjob
 	
 install-linkerd:
 	linkerd install | kubectl apply -f - &&\

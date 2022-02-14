@@ -1,0 +1,9 @@
+# https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-collector
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
+  name: opentelemetry
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://open-telemetry.github.io/opentelemetry-helm-charts

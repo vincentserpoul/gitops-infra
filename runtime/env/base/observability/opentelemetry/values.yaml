@@ -1,0 +1,16 @@
+agentCollector:
+  enabled: false
+standaloneCollector:
+  enabled: true
+config:  
+  exporters:
+    jaeger:
+      endpoint: jaeger-collector.observability:14250
+      tls:
+        insecure: true
+  service:
+    pipelines:
+      metrics: null
+      traces:
+        exporters:
+          - jaeger        

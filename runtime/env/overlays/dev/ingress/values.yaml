@@ -4,10 +4,11 @@ tcp:
   6379: "redis/redis-service:6379"
   5432: "postgres/mypostgres:5432"
   5433: "postgres/mypostgres-replica:5432"
-  9411: "linkerd-jaeger/collector:9411"
+  4317: "observability/observability-opentelemetry-collector:4317"
+  4318: "observability/observability-opentelemetry-collector:4318"
 controller:
   config:
     enable-opentracing: "true"
-    zipkin-collector-host: collector.linkerd-jaeger
+    jaeger-collector-host: observability-opentelemetry-collector.observability
     enable-brotli: "true"
     brotli-level: 8

@@ -24,9 +24,12 @@ ports:
   - port: 5433:5433 # pg read
     nodeFilters:
       - loadbalancer
-  - port: 9411:9411 # zipkin collector
+  - port: 4317:4317 # opentelemetry collector grpc
     nodeFilters:
       - loadbalancer
+  - port: 4318:4318 # opentelemetry collector http
+    nodeFilters:
+      - loadbalancer      
 registries: # define how registries should be created or used
   create: # creates a default registry to be used with the cluster; same as `--registry-create registry.localhost`
     name: registry4PROJECT_NAME.localhost
