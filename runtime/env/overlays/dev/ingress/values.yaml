@@ -6,6 +6,7 @@ tcp:
   5433: "postgres/mypostgres-replica:5432"
   4317: "observability/observability-opentelemetry-collector:4317"
   4318: "observability/observability-opentelemetry-collector:4318"
+  4222: "nats/nats-nats:4222"
 controller:
   config:
     enable-opentracing: "true"

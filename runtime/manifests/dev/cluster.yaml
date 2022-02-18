@@ -34,6 +34,7 @@ data:
       5433: "postgres/mypostgres-replica:5432"
       4317: "observability/observability-opentelemetry-collector:4317"
       4318: "observability/observability-opentelemetry-collector:4318"
+      4222: "nats/nats-nats:4222"
     controller:
       config:
         enable-opentracing: "true"
@@ -157,6 +158,23 @@ spec:
   valuesFrom:
   - kind: ConfigMap
     name: configmap-nginx
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: nack
+  namespace: nats
+spec:
+  chart:
+    spec:
+      chart: nack
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: nats
+        namespace: flux-system
+      version: '>=0.13'
+  interval: 1m
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease

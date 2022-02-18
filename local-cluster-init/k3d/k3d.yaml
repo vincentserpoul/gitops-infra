@@ -30,6 +30,9 @@ ports:
   - port: 4318:4318 # opentelemetry collector http
     nodeFilters:
       - loadbalancer      
+  - port: 4222:4222 # nats
+    nodeFilters:
+      - loadbalancer     
 registries: # define how registries should be created or used
   create: # creates a default registry to be used with the cluster; same as `--registry-create registry.localhost`
     name: registry4PROJECT_NAME.localhost
