@@ -48,27 +48,24 @@ metadata:
 ---
 apiVersion: v1
 data:
-  values.yaml: |-
-    nats:
-      jetstream:
-        enabled: true
-
-        fileStorage:
-          enabled: true
-          storageDirectory: /data/
-          existingClaim: nats-js-disk
-          claimStorageSize: 3Gi
-
-      # tls:
-      #   secret:
-      #     name: nats-client-tls
-      #   ca: "ca.crt"
-      #   cert: "tls.crt"
-      #   key: "tls.key"
-
-    cluster:
-      enabled: true
-      replicas: 3
+  nack-values.yaml: "jetstream:\n  enabled: true\n  \n  nats:\n    url: nats://nats-nats:4222
+    \ "
+kind: ConfigMap
+metadata:
+  name: configmap-nack
+  namespace: nats
+---
+apiVersion: v1
+data:
+  nats-values.yaml: "nats:\n  #jetstream\n  jetstream:\n    enabled: true\n\n    memStorage:\n
+    \     enabled: true\n      size: \"2Gi\"\n\n    fileStorage:\n      enabled: true\n
+    \     storageDirectory: /data/\n      existingClaim: nats-js-disk\n      claimStorageSize:
+    3Gi\n\n  # NATS Server TLS\n  tls:\n    allowNonTLS: true\n    secret:\n      name:
+    nats-server-tls\n    ca: \"ca.crt\"\n    cert: \"tls.crt\"\n    key: \"tls.key\"\n
+    \   timeout: \"5s\"\n\ncluster:\n  enabled: true\n  replicas: 3\n\n  tls:\n    secret:\n
+    \     name: nats-server-tls\n    ca: \"ca.crt\"\n    cert: \"tls.crt\"\n    key:
+    \"tls.key\"\n    \nexporter:\n  # You have to enable exporter first\n  enabled:
+    false  "
 kind: ConfigMap
 metadata:
   name: configmap-nats
@@ -110,6 +107,29 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nats-server-tls
+  namespace: nats
+spec:
+  commonName: nats-nats.nats.svc.cluster.local
+  dnsNames:
+  - nats-nats
+  - nats-nats.nats
+  - nats-nats.nats.svc
+  - nats-nats.nats.svc.cluster.local
+  - '*.nats-nats'
+  - '*.nats-nats.nats'
+  - '*.nats-nats.nats.svc'
+  - '*.nats-nats.nats.svc.cluster.local'
+  duration: 2160h
+  issuerRef:
+    kind: ClusterIssuer
+    name: mkcert-cluster-issuer
+  renewBefore: 240h
+  secretName: nats-server-tls
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -175,6 +195,11 @@ spec:
         namespace: flux-system
       version: '>=0.13'
   interval: 1m
+  targetNamespace: nats
+  valuesFrom:
+  - kind: ConfigMap
+    name: configmap-nack
+    valuesKey: nack-values.yaml
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -196,6 +221,7 @@ spec:
   valuesFrom:
   - kind: ConfigMap
     name: configmap-nats
+    valuesKey: nats-values.yaml
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease

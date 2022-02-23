@@ -1,0 +1,39 @@
+nats:
+  #jetstream
+  jetstream:
+    enabled: true
+
+    memStorage:
+      enabled: true
+      size: "2Gi"
+
+    fileStorage:
+      enabled: true
+      storageDirectory: /data/
+      existingClaim: nats-js-disk
+      claimStorageSize: 3Gi
+
+  # NATS Server TLS
+  tls:
+    allowNonTLS: true
+    secret:
+      name: nats-server-tls
+    ca: "ca.crt"
+    cert: "tls.crt"
+    key: "tls.key"
+    timeout: "5s"
+
+cluster:
+  enabled: true
+  replicas: 3
+
+  tls:
+    secret:
+      name: nats-server-tls
+    ca: "ca.crt"
+    cert: "tls.crt"
+    key: "tls.key"
+    
+exporter:
+  # You have to enable exporter first
+  enabled: false  

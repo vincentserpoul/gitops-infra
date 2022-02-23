@@ -1,50 +1,22 @@
----
-apiVersion: cert-manager.io/v1alpha2
-kind: Certificate
-metadata:
-  name: nats-ca
-  namespace: nats  
-spec:
-  secretName: nats-ca
-  duration: 8736h # 1 year
-  renewBefore: 240h # 10 days
-  issuerRef:
-    name: mkcert-cluster-issuer
-    kind: ClusterIssuer
-  commonName: nats-ca
-  usages:
-  - cert sign
-  organization:
-  - aleas
-  isCA: true
----
-apiVersion: cert-manager.io/v1alpha2
-kind: Issuer
-metadata:
-  name: nats-ca
-  namespace: nats    
-spec:
-  ca:
-    secretName: nats-ca
----
-apiVersion: cert-manager.io/v1alpha2
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: nats-server-tls
-  namespace: nats  
+  namespace: nats
 spec:
   secretName: nats-server-tls
   duration: 2160h # 90 days
   renewBefore: 240h # 10 days
   issuerRef:
-    name: nats-ca
-    kind: Issuer
-  usages:
-  - signing
-  - key encipherment
-  - server auth
-  organization:
-  - aleas
-  commonName: nats.default.svc.cluster.local
+    name: mkcert-cluster-issuer
+    kind: ClusterIssuer
+  commonName: nats-nats.nats.svc.cluster.local
   dnsNames:
-  - nats.default.svc
+  - nats-nats
+  - nats-nats.nats
+  - nats-nats.nats.svc
+  - nats-nats.nats.svc.cluster.local
+  - '*.nats-nats'
+  - '*.nats-nats.nats'
+  - '*.nats-nats.nats.svc'
+  - '*.nats-nats.nats.svc.cluster.local'

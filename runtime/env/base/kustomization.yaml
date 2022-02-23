@@ -7,7 +7,11 @@ configMapGenerator:
   - name: configmap-nats
     namespace: nats
     files:
-      - ./stream/nats/values.yaml
+      - ./stream/nats/nats-values.yaml
+  - name: configmap-nack
+    namespace: nats
+    files:
+      - ./stream/nats/nack-values.yaml      
   - name: configmap-opentelemetry-collector
     namespace: observability
     files:
@@ -33,4 +37,5 @@ resources:
   - storage/postgres/postgres.yaml
   - stream/nats/helm-repository.yaml
   - stream/nats/namespace.yaml
-  - stream/nats/helm-release.yaml
+  - stream/nats/nats-helm-release.yaml
+  - stream/nats/nack-helm-release.yaml
