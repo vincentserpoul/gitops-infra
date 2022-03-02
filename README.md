@@ -23,9 +23,8 @@
 
 - [x] nats jetstream
 - [x] run Kube-score ✅, regula ✅, popeye (bugged for latest k8s, to rerun), polaris ✅ on the configs/cluster
-- [x] [simple app example](https://github.com/vincentserpoul/gitops-simplehttp)
+- [x] [app examples](https://github.com/vincentserpoul/gitops-example)
 - [ ] realtime from supabase for pg updates
-- [ ] complex app example (leveraging tracing, realtime, postgres and jetstream)
 - [ ] test pgcat in front of the cluster?
 - [ ] gitcliff changelog
 - [ ] pixie
