@@ -75,8 +75,10 @@ apiVersion: v1
 data:
   values.yaml: "agentCollector:\n  enabled: false\nstandaloneCollector:\n  enabled:
     true\nconfig:  \n  exporters:\n    jaeger:\n      endpoint: jaeger-collector.observability:14250\n
-    \     tls:\n        insecure: true\n  service:\n    pipelines:\n      metrics:
-    null\n      traces:\n        exporters:\n          - jaeger        "
+    \     tls:\n        insecure: true\n    # otlp:\n    #   endpoint: https://otlp.nr-data.net:4317\n
+    \   #   headers:\n    #     api-key: \"xxx\"\n  service:\n    pipelines:\n      metrics:
+    null\n      traces:\n        exporters:\n          - jaeger  \n          # - otlp
+    \     "
 kind: ConfigMap
 metadata:
   name: configmap-opentelemetry-collector
@@ -255,7 +257,7 @@ spec:
         kind: HelmRepository
         name: opentelemetry
         namespace: flux-system
-      version: '>=0.6'
+      version: '>=0.12'
   interval: 1m
   targetNamespace: observability
   valuesFrom:

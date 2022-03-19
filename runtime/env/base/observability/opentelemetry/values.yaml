@@ -8,9 +8,14 @@ config:
       endpoint: jaeger-collector.observability:14250
       tls:
         insecure: true
+    # otlp:
+    #   endpoint: https://otlp.nr-data.net:4317
+    #   headers:
+    #     api-key: "xxx"
   service:
     pipelines:
       metrics: null
       traces:
         exporters:
-          - jaeger        
+          - jaeger  
+          # - otlp      
