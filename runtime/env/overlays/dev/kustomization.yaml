@@ -12,5 +12,5 @@ generatorOptions:
 resources:
   - ../../base
   - ./certs/cloud-cert-issuer.yaml
-  - ./stream/nats/certs.yaml
-  - ./stream/nats/pvc.yaml
+  # - ./stream/nats/certs.yaml
+  # - ./stream/nats/pvc.yaml

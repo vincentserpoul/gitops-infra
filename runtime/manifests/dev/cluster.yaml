@@ -6,6 +6,11 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: cockroachdb
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: ingress-nginx
 ---
 apiVersion: v1
@@ -19,28 +24,15 @@ metadata:
   name: observability
 ---
 apiVersion: v1
-kind: Namespace
-metadata:
-  name: postgres
----
-apiVersion: v1
 data:
-  values.yaml: |
-    # thank you https://github.com/mailazy/blog/blob/28258657fc9d636eed08b6ff65f953bf450a57e5/content/exposing-tcp-udp-services-ingress/index.md
-    tcp:
-      26257: "cockroachdb/cockroachdb-service:26257"
-      6379: "redis/redis-service:6379"
-      5432: "postgres/mypostgres:5432"
-      5433: "postgres/mypostgres-replica:5432"
-      4317: "observability/observability-opentelemetry-collector:4317"
-      4318: "observability/observability-opentelemetry-collector:4318"
-      4222: "nats/nats-nats:4222"
-    controller:
-      config:
-        enable-opentracing: "true"
-        jaeger-collector-host: observability-opentelemetry-collector.observability
-        enable-brotli: "true"
-        brotli-level: 8
+  values.yaml: "# thank you https://github.com/mailazy/blog/blob/28258657fc9d636eed08b6ff65f953bf450a57e5/content/exposing-tcp-udp-services-ingress/index.md\ntcp:\n
+    \ 26257: \"cockroachdb/cockroachdb-public:26257\"\n  6379: \"redis/redis-service:6379\"\n
+    \ 5432: \"postgres/mypostgres:5432\"\n  5433: \"postgres/mypostgres-replica:5432\"\n
+    \ 4317: \"observability/opentelemetry-collector:4317\"\n  4318: \"observability/opentelemetry-collector:4318\"\n
+    \ 4222: \"nats/nats:4222\"\ncontroller:\n  config:\n    enable-opentracing: \"true\"\n
+    \   jaeger-collector-host: opentelemetry-collector.observability\n    enable-brotli:
+    \"true\"\n    brotli-level: 8\n  # extraModules: \n  # - name: opentelemetry\n
+    \ #   image: busybox"
 kind: ConfigMap
 metadata:
   name: configmap-nginx
@@ -84,55 +76,6 @@ metadata:
   name: configmap-opentelemetry-collector
   namespace: observability
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  annotations:
-    volume.beta.kubernetes.io/storage-class: local-path
-  name: nats-js-disk
-  namespace: nats
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 3Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-backup-pvc
-  namespace: postgres
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: nats-server-tls
-  namespace: nats
-spec:
-  commonName: nats-nats.nats.svc.cluster.local
-  dnsNames:
-  - nats-nats
-  - nats-nats.nats
-  - nats-nats.nats.svc
-  - nats-nats.nats.svc.cluster.local
-  - '*.nats-nats'
-  - '*.nats-nats.nats'
-  - '*.nats-nats.nats.svc'
-  - '*.nats-nats.nats.svc.cluster.local'
-  duration: 2160h
-  issuerRef:
-    kind: ClusterIssuer
-    name: mkcert-cluster-issuer
-  renewBefore: 240h
-  secretName: nats-server-tls
----
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -155,10 +98,27 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: cert-manager
-        namespace: flux-system
       version: '>=1.7.0'
   interval: 5m
-  targetNamespace: cert-manager
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cockroachdb
+  namespace: cockroachdb
+spec:
+  chart:
+    spec:
+      chart: cockroachdb
+      interval: 1m
+      sourceRef:
+        kind: HelmRepository
+        name: cockroachdb
+        namespace: cockroachdb
+      version: '>=7.0.1'
+  install:
+    disableWait: true
+  interval: 1m
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -173,57 +133,12 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: ingress-nginx
-        namespace: flux-system
+        namespace: ingress-nginx
       version: '>=4'
   interval: 1m
-  targetNamespace: ingress-nginx
   valuesFrom:
   - kind: ConfigMap
     name: configmap-nginx
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: nack
-  namespace: nats
-spec:
-  chart:
-    spec:
-      chart: nack
-      interval: 1m
-      sourceRef:
-        kind: HelmRepository
-        name: nats
-        namespace: flux-system
-      version: '>=0.13'
-  interval: 1m
-  targetNamespace: nats
-  valuesFrom:
-  - kind: ConfigMap
-    name: configmap-nack
-    valuesKey: nack-values.yaml
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: nats
-  namespace: nats
-spec:
-  chart:
-    spec:
-      chart: nats
-      interval: 1m
-      sourceRef:
-        kind: HelmRepository
-        name: nats
-        namespace: flux-system
-      version: '>=0.13'
-  interval: 1m
-  targetNamespace: nats
-  valuesFrom:
-  - kind: ConfigMap
-    name: configmap-nats
-    valuesKey: nats-values.yaml
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -238,10 +153,9 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: jaegertracing
-        namespace: flux-system
+        namespace: observability
       version: '>=0.5'
   interval: 1m
-  targetNamespace: observability
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -256,10 +170,8 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: opentelemetry
-        namespace: flux-system
       version: '>=0.12'
   interval: 1m
-  targetNamespace: observability
   valuesFrom:
   - kind: ConfigMap
     name: configmap-opentelemetry-collector
@@ -270,39 +182,11 @@ metadata:
   name: jaeger
   namespace: observability
 ---
-apiVersion: kubegres.reactive-tech.io/v1
-kind: Kubegres
-metadata:
-  annotations:
-    linkerd.io/inject: enabled
-  name: mypostgres
-  namespace: postgres
-spec:
-  backup:
-    pvcName: my-backup-pvc
-    schedule: 0 */1 * * *
-    volumeMount: /var/lib/backup
-  database:
-    size: 200Mi
-  env:
-  - name: POSTGRES_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        key: superUserPassword
-        name: local-postgres-secret
-  - name: POSTGRES_REPLICATION_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        key: replicationUserPassword
-        name: local-postgres-secret
-  image: postgres:14.1
-  replicas: 3
----
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
   name: cert-manager
-  namespace: flux-system
+  namespace: cert-manager
 spec:
   interval: 120m
   url: https://charts.jetstack.io
@@ -310,8 +194,17 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
+  name: cockroachdb
+  namespace: cockroachdb
+spec:
+  interval: 1m
+  url: https://charts.cockroachdb.com/
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
   name: ingress-nginx
-  namespace: flux-system
+  namespace: ingress-nginx
 spec:
   interval: 1m
   url: https://kubernetes.github.io/ingress-nginx
@@ -319,17 +212,8 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
-  name: jaegertracing
-  namespace: flux-system
-spec:
-  interval: 1m
-  url: https://jaegertracing.github.io/helm-charts
----
-apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-metadata:
   name: nats
-  namespace: flux-system
+  namespace: nats
 spec:
   interval: 1m
   url: https://nats-io.github.io/k8s/helm/charts/
@@ -337,8 +221,17 @@ spec:
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
+  name: jaegertracing
+  namespace: observability
+spec:
+  interval: 1m
+  url: https://jaegertracing.github.io/helm-charts
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: HelmRepository
+metadata:
   name: opentelemetry
-  namespace: flux-system
+  namespace: observability
 spec:
   interval: 1m
   url: https://open-telemetry.github.io/opentelemetry-helm-charts

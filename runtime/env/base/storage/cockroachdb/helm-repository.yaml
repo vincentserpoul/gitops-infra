@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository
 metadata:
-  name: nats
-  namespace: nats
+  name: cockroachdb
+  namespace: cockroachdb
 spec:
   interval: 1m
-  url: https://nats-io.github.io/k8s/helm/charts/
+  url: https://charts.cockroachdb.com/

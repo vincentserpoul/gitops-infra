@@ -1,7 +1,7 @@
 .PHONY: init
 
 init:
-	@read -p "Enter Project Name:" PROJECT_NAME; \
+	@read -p "Enter Project Name: " PROJECT_NAME; \
 	sed \
 	-e "s/PROJECT_NAME/$$PROJECT_NAME/g" \
 	./k3d.yaml > ./.k3d_$$PROJECT_NAME.yaml &&\

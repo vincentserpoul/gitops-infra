@@ -54,11 +54,11 @@ manifest-kustomize-build:
 ################
 
 install-crds-cert-manager:
-	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.0/cert-manager.crds.yaml
+	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
 
-######
-# DB #
-######
+############
+# POSTGRES #
+############
 
 install-crds-kubegres:
 	kubectl apply -f https://raw.githubusercontent.com/reactive-tech/kubegres/v1.15/kubegres.yaml
@@ -66,7 +66,7 @@ install-crds-kubegres:
 init-db-password: create-password create-yaml-from-file encrypt-yaml
 
 create-password:
-	@read -p "Enter pass for db: " DB_PASSWORD &&\
+	@printf "Enter pass for postgres db: "; read -rs DB_PASSWORD && \
 	printf $${DB_PASSWORD} > env/overlays/$(ENV)/storage/postgres/secrets/.db_password
 
 create-yaml-from-file:
@@ -79,6 +79,26 @@ encrypt-yaml:
 	sops --encrypt --encrypted-regex '^(data|stringData)$$' \
 		--age $(AGE_RECIPIENTS) env/overlays/$(ENV)/storage/postgres/secrets/secret.yaml \
 		> ./manifests/$(ENV)/secret.enc.yaml
+
+###############
+# COCKROACHDB #
+###############
+
+# https://github.com/fluxcd/flux2/issues/2563
+# https://github.com/cockroachdb/helm-charts/issues/234
+tmp-install-cockroachdb:
+	helm repo add cockroachdb https://charts.cockroachdb.com/ && \
+	helm repo update && \
+	helm install -f env/overlays/$(ENV)/storage/cockroachdb/values.yaml \
+		cockroachdb cockroachdb/cockroachdb -n cockroachdb
+
+create-crdb-password:
+	@printf "Enter pass for cockroach db: "; read -rs DB_PASSWORD && \
+	kubectl exec -it cockroachdb-0 \
+		-- ./cockroach sql \
+		--certs-dir=/cockroach-certs \
+		--host=cockroachdb-cockroachdb-public \
+	SELECT 1
 
 ##############
 # encryption #

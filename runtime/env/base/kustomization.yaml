@@ -15,7 +15,7 @@ configMapGenerator:
   - name: configmap-opentelemetry-collector
     namespace: observability
     files:
-      - ./observability/opentelemetry/values.yaml      
+      - ./observability/opentelemetry/values.yaml                
 generatorOptions:
   disableNameSuffixHash: true
 
@@ -32,10 +32,13 @@ resources:
   - observability/jaeger/helm-repository.yaml
   - observability/jaeger/helm-release.yaml  
   - observability/jaeger/jaegertracing.yaml    
-  - storage/postgres/namespace.yaml
-  - storage/postgres/backup.yaml
-  - storage/postgres/postgres.yaml
+  # - storage/postgres/namespace.yaml
+  # - storage/postgres/backup.yaml
+  # - storage/postgres/postgres.yaml
+  - storage/cockroachdb/helm-release.yaml  
+  - storage/cockroachdb/helm-repository.yaml 
+  - storage/cockroachdb/namespace.yaml
   - stream/nats/helm-repository.yaml
   - stream/nats/namespace.yaml
-  - stream/nats/nats-helm-release.yaml
-  - stream/nats/nack-helm-release.yaml
+  # - stream/nats/nats-helm-release.yaml
+  # - stream/nats/nack-helm-release.yaml

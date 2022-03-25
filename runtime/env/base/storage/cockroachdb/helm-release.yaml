@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cockroachdb
+  namespace: cockroachdb
+spec:
+  interval: 1m
+  # https://github.com/fluxcd/flux2/issues/2563
+  install:
+    disableWait: true
+  chart:
+    spec:
+      chart: "cockroachdb"
+      version: ">=7.0.1"
+      sourceRef:
+        kind: HelmRepository
+        name: cockroachdb
+        namespace: cockroachdb
+      interval: 1m
