@@ -17,3 +17,6 @@ spec:
         name: cockroachdb
         namespace: cockroachdb
       interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: configmap-cockroachdb  

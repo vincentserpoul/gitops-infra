@@ -31,13 +31,15 @@ resources:
   - observability/opentelemetry/helm-release.yaml
   - observability/jaeger/helm-repository.yaml
   - observability/jaeger/helm-release.yaml  
-  - observability/jaeger/jaegertracing.yaml    
-  # - storage/postgres/namespace.yaml
-  # - storage/postgres/backup.yaml
-  # - storage/postgres/postgres.yaml
-  - storage/cockroachdb/helm-release.yaml  
+  #  need to be commented otherwise because it needs to wait for jaeger operator
+  # - observability/jaeger/jaegertracing.yaml    
+  #  need to be commented otherwise because it needs to wait for cert-manager
+  # - storage/cockroachdb/helm-release.yaml  
   - storage/cockroachdb/helm-repository.yaml 
   - storage/cockroachdb/namespace.yaml
+  # - storage/postgres/namespace.yaml
+  # - storage/postgres/backup.yaml
+  # - storage/postgres/postgres.yaml  
   - stream/nats/helm-repository.yaml
   - stream/nats/namespace.yaml
   # - stream/nats/nats-helm-release.yaml

@@ -1,0 +1,10 @@
+tls:
+  certs:
+    selfSigner:
+      enabled: false
+    certManager: true
+    certManagerIssuer:
+      group: cert-manager.io
+      kind: ClusterIssuer
+      name: mkcert-cluster-issuer
+    useCertManagerV1CRDs: true      

@@ -25,6 +25,16 @@ metadata:
 ---
 apiVersion: v1
 data:
+  values.yaml: "tls:\n  certs:\n    selfSigner:\n      enabled: false\n    certManager:
+    true\n    certManagerIssuer:\n      group: cert-manager.io\n      kind: ClusterIssuer\n
+    \     name: mkcert-cluster-issuer\n    useCertManagerV1CRDs: true      "
+kind: ConfigMap
+metadata:
+  name: configmap-cockroachdb
+  namespace: cockroachdb
+---
+apiVersion: v1
+data:
   values.yaml: "# thank you https://github.com/mailazy/blog/blob/28258657fc9d636eed08b6ff65f953bf450a57e5/content/exposing-tcp-udp-services-ingress/index.md\ntcp:\n
     \ 26257: \"cockroachdb/cockroachdb-public:26257\"\n  6379: \"redis/redis-service:6379\"\n
     \ 5432: \"postgres/mypostgres:5432\"\n  5433: \"postgres/mypostgres-replica:5432\"\n
@@ -104,25 +114,6 @@ spec:
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: cockroachdb
-  namespace: cockroachdb
-spec:
-  chart:
-    spec:
-      chart: cockroachdb
-      interval: 1m
-      sourceRef:
-        kind: HelmRepository
-        name: cockroachdb
-        namespace: cockroachdb
-      version: '>=7.0.1'
-  install:
-    disableWait: true
-  interval: 1m
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
   name: ingress-nginx
   namespace: ingress-nginx
 spec:
@@ -175,12 +166,6 @@ spec:
   valuesFrom:
   - kind: ConfigMap
     name: configmap-opentelemetry-collector
----
-apiVersion: jaegertracing.io/v1
-kind: Jaeger
-metadata:
-  name: jaeger
-  namespace: observability
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: HelmRepository

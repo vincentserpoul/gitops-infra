@@ -13,7 +13,7 @@ apply-all: context-select encrypted-manifests-apply manifest-kustomize-build man
 # INIT #
 ########
 
-init: context-select install-crds init-db-password age-keygen 
+init: context-select install-crds age-keygen init-db-password
 	
 install-crds: install-crds-cert-manager install-crds-kubegres install-crds-nats-nack install-flux
 	
