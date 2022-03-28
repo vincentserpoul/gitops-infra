@@ -14,10 +14,12 @@ make init
 cd ../../..
 make apply-all
 
+cd ..
+
 sleep 30
 
 # we need to run that later on, as we need jaeger-operator to be avail
-kubectl apply -f runtime/env/base/observability/jaeger/jaegertracing.yaml
+kubectl apply -f ./runtime/env/base/observability/jaeger/jaegertracing.yaml
 
 # we need to run that later on, as we need cert-manager to be avail
-kubectl apply -f runtime/env/base/storage/cockroachdb/helm-release.yaml
+kubectl apply -f ./runtime/env/base/storage/cockroachdb/helm-release.yaml
