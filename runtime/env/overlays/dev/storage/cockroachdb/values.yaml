@@ -1,5 +1,8 @@
 statefulset:
   replicas: 3
+storage:
+  persistentVolume:
+    size: 20Gi
 tls:
   certs:
     selfSigner:

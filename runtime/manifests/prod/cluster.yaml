@@ -25,9 +25,10 @@ metadata:
 ---
 apiVersion: v1
 data:
-  values.yaml: "statefulset:\n  replicas: 10\ntls:\n  certs:\n    selfSigner:\n      enabled:
-    false\n    certManager: true\n    certManagerIssuer:\n      kind: ClusterIssuer\n
-    \     name: mkcert-cluster-issuer\n    useCertManagerV1CRDs: true      "
+  values.yaml: "statefulset:\n  replicas: 5\nstorage:\n  persistentVolume:\n    size:
+    20Gi  \ntls:\n  certs:\n    selfSigner:\n      enabled: false\n    certManager:
+    true\n    certManagerIssuer:\n      kind: ClusterIssuer\n      name: mkcert-cluster-issuer\n
+    \   useCertManagerV1CRDs: true      "
 kind: ConfigMap
 metadata:
   name: configmap-cockroachdb
