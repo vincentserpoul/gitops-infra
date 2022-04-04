@@ -6,6 +6,10 @@ configMapGenerator:
     namespace: ingress-nginx
     files:
       - ./ingress/values.yaml
+  - name: configmap-cockroachdb
+    namespace: cockroachdb
+    files:
+      - ./storage/cockroachdb/values.yaml       
 generatorOptions:
   disableNameSuffixHash: true
 

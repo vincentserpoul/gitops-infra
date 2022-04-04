@@ -15,11 +15,7 @@ configMapGenerator:
   - name: configmap-opentelemetry-collector
     namespace: observability
     files:
-      - ./observability/opentelemetry/values.yaml   
-  - name: configmap-cockroachdb
-    namespace: cockroachdb
-    files:
-      - ./storage/cockroachdb/values.yaml                     
+      - ./observability/opentelemetry/values.yaml                 
 generatorOptions:
   disableNameSuffixHash: true
 

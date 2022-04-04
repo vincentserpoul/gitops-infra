@@ -1,3 +1,5 @@
+statefulset:
+  replicas: 3
 tls:
   certs:
     selfSigner:

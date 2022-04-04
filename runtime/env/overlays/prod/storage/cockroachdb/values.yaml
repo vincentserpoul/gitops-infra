@@ -1,0 +1,11 @@
+statefulset:
+  replicas: 10
+tls:
+  certs:
+    selfSigner:
+      enabled: false
+    certManager: true
+    certManagerIssuer:
+      kind: ClusterIssuer
+      name: mkcert-cluster-issuer
+    useCertManagerV1CRDs: true      
