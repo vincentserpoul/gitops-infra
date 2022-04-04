@@ -8,4 +8,4 @@ init:
 
 registry-create:
 	doctl registry create --region=sgp1 --subscription-tier=starter gitops && \
-	docker registry login gitops
+	doctl registry login gitops
