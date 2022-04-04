@@ -6,7 +6,7 @@ metadata:
 spec:
   acme:
     server: "https://acme-v02.api.letsencrypt.org/directory"
-    email: "vincent_serpoul@manulife.com"
+    email: "4hxckw2zo@relay.firefox.com"
     privateKeySecretRef:
       name: letsencrypt-prod
     solvers:
