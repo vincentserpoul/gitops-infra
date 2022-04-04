@@ -13,7 +13,9 @@ apply-all: context-select encrypted-manifests-apply manifest-kustomize-build man
 # INIT #
 ########
 
-init: context-select install-crds age-keygen init-db-password
+# init: context-select install-crds age-keygen init-db-password
+
+init: context-select install-crds age-keygen ca-init
 	
 install-crds: install-crds-cert-manager install-crds-kubegres install-crds-nats-nack install-flux
 	
@@ -54,7 +56,7 @@ manifest-kustomize-build:
 ################
 
 install-crds-cert-manager:
-	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
+	kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.7.2/cert-manager.crds.yaml
 
 ############
 # POSTGRES #
@@ -105,7 +107,7 @@ create-crdb-password:
 ##############
 
 age-keygen:
-	@test -f ./env/overlays/$(ENV)/key.age || \
+	@test -f ./env/overlays/$(ENV)/key.pub || \
 	( \
 	age-keygen > ./env/overlays/$(ENV)/key.age && \
 	cat ./env/overlays/$(ENV)/key.age | sed -n -e 's/^.*# public key: //p' > ./env/overlays/$(ENV)/key.pub && \
@@ -118,3 +120,27 @@ age-keygen:
 
 install-crds-nats-nack:
 	kubectl apply -f https://raw.githubusercontent.com/nats-io/nack/v0.6.0/deploy/crds.yml
+
+######
+# CA #
+######
+
+CAROOT = $(shell mkcert -CAROOT)
+
+ca-init: ca-create-ca-key-pair ca-encrypt-yaml
+
+ca-create-ca-key-pair: ca-create-namespace
+	mkcert --install &&\
+	kubectl -n cert-manager create secret tls ca-key-pair \
+		--key="$(CAROOT)/rootCA-key.pem" \
+		--cert="$(CAROOT)/rootCA.pem" \
+		--dry-run=client -o yaml >> ./env/overlays/$(ENV)/certs/tls.yaml
+
+ca-create-namespace:
+	kubectl create namespace cert-manager --dry-run=client -o yaml > ./env/overlays/$(ENV)/certs/tls.yaml &&\
+	echo "---" >> ./env/overlays/$(ENV)/certs/tls.yaml
+
+ca-encrypt-yaml:
+	sops --encrypt --encrypted-regex '^(data|stringData)$$' \
+		--age $(AGE_RECIPIENTS) ./env/overlays/$(ENV)/certs/tls.yaml \
+		> ./manifests/$(ENV)/tls.enc.yaml

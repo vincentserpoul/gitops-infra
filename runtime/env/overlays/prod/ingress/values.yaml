@@ -1,6 +1,6 @@
 controller:
   config:
     enable-opentracing: "true"
-    zipkin-collector-host: collector.linkerd-jaeger
+    jaeger-collector-host: opentelemetry-collector.observability
     enable-brotli: "true"
     brotli-level: 8

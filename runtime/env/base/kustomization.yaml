@@ -15,7 +15,11 @@ configMapGenerator:
   - name: configmap-opentelemetry-collector
     namespace: observability
     files:
-      - ./observability/opentelemetry/values.yaml                
+      - ./observability/opentelemetry/values.yaml   
+  - name: configmap-cockroachdb
+    namespace: cockroachdb
+    files:
+      - ./storage/cockroachdb/values.yaml                     
 generatorOptions:
   disableNameSuffixHash: true
 
@@ -25,6 +29,7 @@ resources:
   - ingress/helm-release.yaml
   - certs/helm-repository.yaml
   - certs/namespace.yaml
+  - certs/cloud-cert-issuer.yaml
   - certs/helm-release.yaml
   - observability/namespace.yaml  
   - observability/opentelemetry/helm-repository.yaml

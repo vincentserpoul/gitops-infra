@@ -9,7 +9,7 @@
 
 ## Setup a local cluster
 
-[README](./local-cluster-init/)
+[README](./cluster-init/)
 
 ## Set runtime components
 
@@ -28,3 +28,9 @@
 - [ ] test pgcat in front of the cluster?
 - [ ] gitcliff changelog
 - [ ] pixie
+
+## Domains for cloud clusters
+
+### Freenom
+
+Get a .tk free domain name!

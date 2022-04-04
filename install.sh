@@ -1,17 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -eou pipefail
+set -Eeuo pipefail
 
-cd local-cluster-init/k3d
+ENV="${ENV:-"dev"}"
+
+case "$ENV" in
+ prod) PROVIDER="digitalocean" ;;
+    *) PROVIDER="k3d" ;;
+esac
+
+cd cluster-init/"${PROVIDER}"
+
 make init
-cd ../../runtime
 
 sleep 15
 
+cd ../../runtime
+
 make init
-cd env/overlays/dev
-make init
-cd ../../..
+
 make apply-all
 
 cd ..

@@ -5,7 +5,7 @@ configMapGenerator:
   - name: configmap-nginx
     namespace: ingress-nginx
     files:
-      - ./ingress/values.yaml
+      - ./ingress/values.yaml 
 generatorOptions:
   disableNameSuffixHash: true
 
