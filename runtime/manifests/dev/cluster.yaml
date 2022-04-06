@@ -25,7 +25,8 @@ metadata:
 ---
 apiVersion: v1
 data:
-  values.yaml: "tls:\n  certs:\n    selfSigner:\n      enabled: false\n    certManager:
+  values.yaml: "statefulset:\n  replicas: 3\nstorage:\n  persistentVolume:\n    size:
+    20Gi\ntls:\n  certs:\n    selfSigner:\n      enabled: false\n    certManager:
     true\n    certManagerIssuer:\n      kind: ClusterIssuer\n      name: mkcert-cluster-issuer\n
     \   useCertManagerV1CRDs: true      "
 kind: ConfigMap
