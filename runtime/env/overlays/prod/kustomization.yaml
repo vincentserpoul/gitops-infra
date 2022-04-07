@@ -16,4 +16,5 @@ generatorOptions:
 resources:
   - ../../base
   - ./certs/cloud-cert-issuer-staging.yaml
-  - ./certs/cloud-cert-issuer.yaml
+  - ./metrics/helm-release.yaml
+  - ./metrics/helm-repository.yaml
